@@ -1,0 +1,69 @@
+<style>
+#devtools-warning {
+  position: fixed;
+  inset: 0;
+  background: black;
+  color: red;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-family: monospace;
+  font-size: 20px;
+  text-align: center;
+  z-index: 999999;
+}
+</style>
+
+<div id="devtools-warning">
+  ⚠ AKSES TERDETEKSI ⚠<br><br>
+  Developer Tools terbuka.<br>
+  Aktivitas Anda sedang direkam.
+</div>
+
+<script>
+(function () {
+  const warning = document.getElementById("devtools-warning");
+  let triggered = false;
+
+  function showWarning() {
+    if (!triggered) {
+      triggered = true;
+      warning.style.display = "flex";
+
+      console.clear();
+      console.log("%cSTOP!", "color:red;font-size:40px;font-weight:bold;");
+      console.log("%cJangan tempelkan kode dari orang lain di sini.", "font-size:16px;");
+    }
+  }
+
+  // 1️⃣ Deteksi resize viewport
+  setInterval(() => {
+    const threshold = 160;
+    if (
+      window.outerWidth - window.innerWidth > threshold ||
+      window.outerHeight - window.innerHeight > threshold
+    ) {
+      showWarning();
+    }
+  }, 1000);
+
+  // 2️⃣ Deteksi debugger pause
+  setInterval(() => {
+    const start = performance.now();
+    debugger;
+    const end = performance.now();
+    if (end - start > 100) {
+      showWarning();
+    }
+  }, 1000);
+
+  // 3️⃣ Deteksi console inspect element trick
+  const element = new Image();
+  Object.defineProperty(element, "id", {
+    get: function () {
+      showWarning();
+    }
+  });
+  console.log(element);
+})();
+</script>

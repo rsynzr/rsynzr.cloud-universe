@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #f8f9fc 0%, #f3f4f8 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #2d3748;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+            padding: 60px;
+            max-width: 720px;
+            width: 100%;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            color: #1a202c;
+            margin-bottom: 12px;
+            font-size: 3em;
+            font-weight: 700;
+            text-align: center;
+            letter-spacing: -0.02em;
+        }
+
+        .subtitle {
+            color: #718096;
+            text-align: center;
+            margin-bottom: 50px;
+            font-size: 1em;
+            font-weight: 400;
+            letter-spacing: 0.02em;
+        }
+
+        .pages-section {
+            margin-bottom: 50px;
+        }
+
+        .pages-section h2 {
+            color: #2d3748;
+            font-size: 1.1em;
+            margin-bottom: 30px;
+            font-weight: 600;
+            letter-spacing: 0.01em;
+            text-transform: uppercase;
+        }
+
+        .pages-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .page-item {
+            padding: 24px;
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            border-radius: 12px;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1.5px solid #e2e8f0;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            display: block;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .page-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: -1;
+        }
+
+        .page-item:hover {
+            border-color: transparent;
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(102, 126, 234, 0.25);
+            color: white;
+        }
+
+        .page-item:hover::before {
+            left: 0;
+        }
+
+        .page-item a {
+            text-decoration: none;
+            color: inherit;
+            font-weight: 600;
+            font-size: 1.15em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .page-item p {
+            font-size: 0.9em;
+            margin-top: 10px;
+            opacity: 0.8;
+            position: relative;
+            z-index: 1;
+            line-height: 1.5;
+        }
+
+        footer {
+            text-align: center;
+            padding-top: 40px;
+            border-top: 1px solid #e2e8f0;
+            color: #718096;
+            font-size: 0.95em;
+            animation: fadeIn 0.8s ease-out 0.3s both;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .credit-link {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .credit-link::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #667eea;
+            transition: width 0.3s ease;
+        }
+
+        .credit-link:hover {
+            color: #764ba2;
+        }
+
+        .credit-link:hover::after {
+            width: 100%;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 40px 24px;
+            }
+
+            h1 {
+                font-size: 2.2em;
+            }
+
+            .pages-list {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .page-item {
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 32px 16px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 8px;
+            }
+
+            .subtitle {
+                margin-bottom: 36px;
+                font-size: 0.95em;
+            }
+
+            .pages-section {
+                margin-bottom: 36px;
+            }
+
+            .pages-section h2 {
+                font-size: 0.95em;
+                margin-bottom: 20px;
+            }
+
+            footer {
+                padding-top: 24px;
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<script src="/security.html"></script>
+<body>
+    <div class="container">
+        <h1>Home</h1>
+        <p class="subtitle">Welcome</p>
+
+        <div class="pages-section">
+            <h2>Pages</h2>
+            <div class="pages-list">
+                <a href="https://project.rsynzr.cloud/project_1" class="page-item">
+                    <div>Crush Database</div>
+                    <p>Crush Search Database v3.1.7 (Secure)</p>
+                </a>
+                <a href="-" class="page-item">
+                    <div>-</div>
+                    <p>-</p>
+                </a>
+                <a href="-" class="page-item">
+                    <div>-</div>
+                    <p>-</p>
+                </a>
+                <a href="-" class="page-item">
+                    <div>-</div>
+                    <p>-</p>
+                </a>
+                <a href="-" class="page-item">
+                    <div>-</div>
+                    <p>-</p>
+                </a>
+                <a href="-" class="page-item">
+                    <div>-</div>
+                    <p>-</p>
+                </a>
+            </div>
+        </div>
+
+        <footer>
+            <p>Made by <a href="https://github.com/rsynzr" class="credit-link">@rsynzr</a></p>
+        </footer>
+    </div>
+</body>
+</html>

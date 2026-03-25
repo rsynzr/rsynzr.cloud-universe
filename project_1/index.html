@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!--
+                                  
+                              
+  _ __ ___ _   _ _ __  _____ __ 
+ | '__/ __| | | | '_ \|_  / '__|
+ | |  \__ \ |_| | | | |/ /| |   
+ |_|  |___/\__, |_| |_/___|_|   
+            __/ |               
+           |___/               
+                                     -->
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Crush Database</title>
+<style>
+  :root{
+    --bg:#f8f9fb; --card:#ffffff; --muted:#6b7280;
+    --primary:#3b82f6; --accent:#8b5cf6; --text:#1f2937;
+    --msg-user:#dbeafe; --msg-bot:#f3f4f6; --border:#e5e7eb;
+    --success:#10b981; --hover:#f0f4ff;
+  }
+  html,body{height:100%;margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg, var(--bg) 0%, #f0f4ff 100%);color:var(--text);}
+  .wrap{min-height:100%;display:flex;align-items:center;justify-content:center;padding:20px;}
+  .card{width:100%;max-width:650px;background:var(--card);border-radius:12px;border:1px solid var(--border);overflow:hidden;box-shadow:0 20px 60px rgba(59,130,246,0.1);}
+  
+  .header{padding:16px 20px;background:linear-gradient(90deg, rgba(59,130,246,0.05), rgba(139,92,246,0.05));border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px;}
+  .title{font-size:1.1rem;font-weight:700;letter-spacing:0.5px;color:var(--primary);}
+  .version{background:rgba(59,130,246,0.1);padding:4px 10px;border:1px solid rgba(59,130,246,0.3);border-radius:4px;font-size:0.7rem;color:var(--primary);letter-spacing:0.5px;}
+  
+  .body{padding:16px;display:flex;flex-direction:column;gap:12px}
+  
+  #chatbox{height:340px;border-radius:8px;padding:12px;overflow:auto;background:linear-gradient(180deg,#fafbfc,#ffffff);border:1px solid var(--border)}
+  #chatbox::-webkit-scrollbar{width:6px}
+  #chatbox::-webkit-scrollbar-thumb{background:rgba(59,130,246,0.3);border-radius:3px}
+  #chatbox::-webkit-scrollbar-track{background:transparent}
+  
+  .msg{display:flex;gap:8px;margin:6px 0;align-items:flex-end}
+  .msg.user{justify-content:flex-end}
+  .bubble{padding:8px 12px;border-radius:8px;font-size:0.9rem;line-height:1.4;max-width:75%}
+  .bubble.user{background:var(--msg-user);color:#1e40af;border:1px solid rgba(59,130,246,0.2)}
+  .bubble.bot{background:var(--msg-bot);color:var(--text);border:1px solid rgba(139,92,246,0.2)}
+  .meta{font-size:0.65rem;color:var(--muted);margin-top:2px}
+  
+  .input-row{display:flex;gap:8px;align-items:center}
+  .input{flex:1;padding:10px 12px;border-radius:6px;border:1px solid var(--border);background:#ffffff;font-size:0.95rem;color:var(--text);transition:all 0.3s ease}
+  .input:focus{outline:none;border-color:var(--primary);background:#ffffff;box-shadow:0 0 12px rgba(59,130,246,0.2)}
+  .input::placeholder{color:var(--muted)}
+  
+  .btn{padding:10px 14px;border-radius:6px;border:1px solid var(--primary);background:transparent;color:var(--primary);font-weight:600;cursor:pointer;font-size:0.85rem;transition:all 0.3s ease}
+  .btn:hover{background:var(--primary);color:#ffffff;box-shadow:0 0 12px rgba(59,130,246,0.4)}
+  .btn.secondary{border-color:var(--muted);color:var(--muted)}
+  .btn.secondary:hover{background:var(--muted);color:var(--bg)}
+  
+  .results{margin-top:6px;border-radius:6px;border:1px solid var(--border);background:#ffffff;max-height:180px;overflow:auto;padding:4px}
+  .result-item{display:flex;justify-content:space-between;align-items:center;padding:7px;border-radius:4px;cursor:pointer;font-size:0.85rem;color:var(--text);transition:all 0.2s ease}
+  .result-item:hover, .result-item.active{background:var(--hover);color:var(--primary)}
+  .result-name{font-weight:600;color:var(--primary)}
+  .result-meta{font-size:0.75rem;color:var(--muted)}
+  mark{background:rgba(139,92,246,0.3);padding:0 2px;border-radius:2px;color:var(--text)}
+  .search-meta{font-size:0.75rem;color:var(--muted);margin-bottom:4px;display:flex;justify-content:space-between}
+  
+  .footer{padding:12px 16px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;font-size:0.75rem;color:var(--muted);gap:12px}
+  .footer-left{display:flex;gap:8px;align-items:center}
+  .theme-btn{background:transparent;border:none;cursor:pointer;font-size:1.2rem;transition:all 0.3s ease;padding:4px 8px}
+  .theme-btn:hover{transform:scale(1.1)}
+  .local-time{font-size:0.75rem;color:var(--muted);font-weight:500;min-width:60px}
+  .small-link{color:var(--primary);text-decoration:none;font-weight:600;transition:all 0.2s}
+  .small-link:hover{text-shadow:0 0 8px rgba(59,130,246,0.5)}
+  
+  /* Notice bar under footer: faded red style */
+  .notice{margin-top:10px;padding:8px 12px;border-radius:8px;background:rgba(220,38,38,0.06);color:rgba(220,38,38,0.95);font-size:0.8rem;text-align:center;border:1px solid rgba(220,38,38,0.09)}
+  
+  #loginOverlay{position:fixed;top:0;left:0;width:100%;height:100%;background:linear-gradient(135deg, var(--bg) 0%, #f0f4ff 100%);display:flex;align-items:center;justify-content:center;z-index:999;padding:20px}
+  .login-card{width:100%;max-width:360px;background:var(--card);border-radius:12px;border:1px solid var(--border);padding:28px;box-shadow:0 20px 60px rgba(59,130,246,0.1);position:relative}
+  .login-title{font-size:1.3rem;font-weight:700;text-align:center;color:var(--primary);margin-bottom:6px}
+  .login-subtitle{font-size:0.85rem;text-align:center;color:var(--muted);margin-bottom:20px}
+  .login-group{margin-bottom:14px}
+  .login-label{display:block;font-size:0.8rem;font-weight:600;color:var(--text);margin-bottom:4px}
+  .login-input{width:100%;padding:9px 11px;border-radius:6px;border:1px solid var(--border);background:#ffffff;font-size:0.9rem;color:var(--text);box-sizing:border-box;transition:all 0.3s ease}
+  .login-input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 12px rgba(59,130,246,0.2)}
+  .login-btn{width:100%;padding:10px;background:linear-gradient(90deg, var(--primary), var(--accent));color:var(--bg);border:none;border-radius:6px;font-weight:600;cursor:pointer;font-size:0.9rem;margin-top:8px;transition:all 0.3s ease}
+  .login-btn:hover{opacity:0.9;box-shadow:0 0 15px rgba(59,130,246,0.3)}
+  .login-error{color:#dc2626;font-size:0.75rem;margin-top:8px;text-align:center;min-height:18px}
+  .login-footer{display:flex;gap:12px;align-items:center;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)}
+  .home-btn{padding:6px 12px;background:#10b981;color:#ffffff;border:none;border-radius:4px;font-size:0.7rem;font-weight:600;cursor:pointer;transition:all 0.3s ease;text-decoration:none;display:inline-block}
+  .home-btn:hover{opacity:0.9;box-shadow:0 0 10px rgba(16,185,129,0.3)}
+  .login-theme-btn{background:transparent;border:none;cursor:pointer;font-size:1rem;transition:all 0.3s ease;padding:4px 8px}
+  .login-theme-btn:hover{transform:scale(1.1)}
+  .login-time{font-size:0.7rem;color:var(--muted);font-weight:500}
+  
+  #appContainer{display:none}
+</style>
+</head>
+<body>
+<!-- Main User Login -->
+<div id="loginOverlay">
+  <div class="login-card">
+    <div class="login-title">Crush Database</div>
+    <div class="login-subtitle">Secure Access</div>
+    
+    <div class="login-group">
+      <label class="login-label">Username</label>
+      <input id="loginUsername" class="login-input" type="text" onkeypress="onLoginKeyPress(event)">
+    </div>
+    
+    <div class="login-group">
+      <label class="login-label">Password</label>
+      <input id="loginPassword" class="login-input" type="password" onkeypress="onLoginKeyPress(event)">
+    </div>
+    
+    <button class="login-btn" onclick="handleLogin()">Login</button>
+    <div id="loginError" class="login-error"></div>
+
+    <div class="login-footer">
+      <a href="https://rsynzr.cloud" class="home-btn">🏠 HOME</a>
+      <button class="login-theme-btn" onclick="toggleTheme()" title="Toggle Theme">🌙</button>
+      <div class="login-time" id="loginTime">--:--</div>
+    </div>
+  </div>
+</div>
+
+<!-- TOTP -->
+<div id="totpOverlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:linear-gradient(135deg, var(--bg) 0%, #f0f4ff 100%);align-items:center;justify-content:center;z-index:1000;padding:20px;">
+  <div class="login-card" style="max-width:420px;margin:auto;">
+    <div class="login-title">Two-Factor Authentication</div>
+    <div class="login-subtitle">Enter the 6-digit code from your authenticator app</div>
+
+    <div class="login-group">
+      <label class="login-label">Code</label>
+      <input id="totpInput" class="login-input" type="text" maxlength="6" inputmode="numeric" pattern="[0-9]*" placeholder="Enter 6-digit code" onkeypress="if(event.key==='Enter') verifyTOTP()">
+    </div>
+
+    <button class="login-btn" onclick="verifyTOTP()">Verify</button>
+    <div id="totpError" class="login-error" style="margin-top:6px"></div>
+
+    <div class="login-footer">
+      <button class="home-btn" onclick="handleLogout()">Cancel / Logout</button>
+      <div class="login-time" id="totpTime">--:--</div>
+    </div>
+  </div>
+</div>
+
+<!-- Main App Database -->
+<div id="appContainer">
+<div class="wrap">
+  <div class="card" role="application">
+    <div class="header">
+      <div class="title">Crush Database</div>
+      <div class="version">v3.1.7</div>
+    </div>
+    <div class="body">
+      <div id="chatbox" aria-live="polite"></div>
+
+      <div class="input-row">
+        <input id="userInput" class="input" placeholder="Cari crush..." aria-label="Search crush" oninput="onType()" onkeydown="onKeyDown(event)">
+        <button class="btn" onclick="sendMessage()" title="Cari">Cari</button>
+        <button class="btn secondary" onclick="clearChat()" title="Clear">Clear</button>
+      </div>
+
+      <div id="resultsWrapper" style="display:none;">
+        <div class="search-meta"><div id="resultsCount">0 results</div><div id="searchSpeed">—</div></div>
+        <div id="results" class="results" role="listbox" tabindex="-1"></div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div class="footer-left">
+        <button class="theme-btn" onclick="toggleTheme()" title="Toggle Theme">🌙</button>
+        <div class="local-time" id="localTime">--:--</div>
+      </div>
+      <div>Created by <a class="small-link" href="https://github.com/rsynzr" target="_blank" rel="noopener">@rsynzr_</a></div>
+      <button class="btn secondary" onclick="handleLogout()" style="padding:6px 10px;font-size:0.75rem">Logout</button>
+    </div>
+    <div class="notice">Notice: data tidak 100% benar dan sangat mungkin adanya kesalahan</div>
+  </div>
+</div>
+</div>
+
+<script>
+  // ========== DATABASE ==========
+  const DB = [
+    {name:'Aci', alias:['aci'], crushes:[{name:'Rendra', school:'Sdms'}], school:'Sdms'},
+    {name:'Arsya', alias:['arsya'], crushes:[{name:'-', school:'-'}], school:'Ps'},
+    {name:'Byan', alias:['byan'], crushes:[{name:'Jahsy', school:'Sdms'}], school:'Ps'},
+    {name:'Davin', alias:['davin'], crushes:[{name:'Anin', school:'Ps'}], school:'Ps'},
+    {name:'Affan', alias:['affan'], crushes:[{name:'Nindya', school:'PS'}], school:'Ps'},
+    {name:'Aisy', alias:['aisy'], crushes:[{name:'Azka', school:'Sdms'}], school:'Sdms'},
+    {name:'Bunga', alias:['bunga'], crushes:[{name:'Jafin', school:'Sdmd4'}], school:'Sdms'},
+    {name:'Anin', alias:['anin'], crushes:[{name:'Davin', school:'Ps'}], school:'Ps'},
+    {name:'Janneta', alias:['janneta'], crushes:[{name:'Byan', school:'Sdms'}], school:'Sdms'},
+    {name:'Agna', alias:['agna'], crushes:[{name:'Nindya', school:'Ps'}], school:'Sdms'},
+    {name:'Kenzie', alias:['kenzie'], crushes:[{name:'Tara Sdms', school:'Sdms'}], school:'Sdms'},
+    {name:'Keyzha', alias:['keyzha'], crushes:[{name:'Fatih', school:'Sdms'}], school:'Sdms'},
+    {name:'Naura', alias:['naura'], crushes:[{name:'Jafin', school:'Sdmd4'}], school:'Sdms'},
+    {name:'Tara Sdms', alias:['tara sdms'], crushes:[{name:'Kenzie', school:'Sdms'}], school:'Sdms'},
+    {name:'Harvi', alias:['harvi'], crushes:[{name:'Nadine', school:'Ps'}, {name:'Alya An', school:'Sdms'}, {name:'Naomi', school:'Ps'}], school:'Ps'},
+    {name:'Rendra', alias:['rendra'], crushes:[{name:'Aci', school:'Sdms'}], school:'Sdms'},
+    {name:'Dilo', alias:['dilo'], crushes:[{name:'Aci', school:'Sdms'}], school:'Sdms'},
+    {name:'Shera', alias:['shera'], crushes:[{name:'Aci', school:'Sdms'}], school:'Sdms'},
+    {name:'Arkana', alias:['arkana'], crushes:[{name:'Ardelia', school:'Sdms'}], school:'Sdms'},
+    {name:'Arjuna', alias:['arjuna'], crushes:[{name:'Bilqis', school:'Ps'}], school:'Ps'},
+    {name:'Afkar', alias:['afkar'], crushes:[{name:'Faiza', school:'Sdms'}], school:'Sdms'},
+    {name:'Keenan', alias:['keenan'], crushes:[{name:'Jahsy', school:'Sdms'}], school:'Ps'},
+    {name:'Arief', alias:['arief'], crushes:[{name:'Jahsy', school:'Sdms'}], school:'Ps'},
+    {name:'Rm Nizam', alias:['rm nizam'], crushes:[{name:'Bita', school:'Sdms'}], school:'Sdms'},
+    {name:'Bita', alias:['bita'], crushes:[{name:'Jafin', school:'Sdmd4'}], school:'Sdms'},
+    {name:'Bara', alias:['bara'], crushes:[{name:'Qila', school:'Sdms'}], school:'Sdms'},
+    {name:'Jahsy', alias:['jahsy'], crushes:[{name:'Byan', school:'Ps'}], school:'Sdms'},
+    {name:'Nindya', alias:['nindya'], crushes:[{name:'Rafa', school:'Ps'}, {name:'Affan', school:'Ps'}], school:'PS'},
+    {name:'Aini', alias:['aini'], crushes:[{name:'Byan', school:'Ps'}], school:'Sdms'},
+    {name:'Damar', alias:['damar'], crushes:[{name:'Ardelia', school:'Sdms'}, {name:'Alina', school:'Sdms'}, {name:'Runa', school:'Ps'}, {name:'Zahira', school:'Ps'}], school:'Ps'},
+    {name:'Alde', alias:['alde'], crushes:[{name:'Jahsy', school:'Sdms'}], school:'Sdms'},
+    {name:'Alya AN', alias:['alya an'], crushes:[{name:'Farzan', school:'?'}], school:'Sdms'},
+    {name:'Rafa', alias:['rafa'], crushes:[{name:'Alya An', school:'Sdms'}, {name:'???', school:'?'}], school:'Ps'},
+    {name:'Nadine', alias:['nadine'], crushes:[{name:'Harvi', school:'Ps'}], school:'Ps'},
+    {name:'Kamila', alias:['kamila'], crushes:[{name:'Zhafran', school:'Ps'}, {name:'Hammam', school:'Ps'}], school:'Ps'},
+    {name:'Runa', alias:['runa'], crushes:[{name:'Hainan', school:'Ps'}, {name:'Athar 7D', school:'Ps'}], school:'Ps'},
+    {name:'Naomi', alias:['naomi'], crushes:[{name:'Harvi', school:'Ps'}], school:'Ps'},
+    {name:'Hainan', alias:['hainan'], crushes:[{name:'Runa', school:'Ps'}], school:'Ps'},
+    {name:'Fahira', alias:['fahira'], crushes:[{name:'Husein (temen sd)', school:'Smupa'}], school:'Ps'},
+    {name:'Faisal', alias:['faisal'], crushes:[{name:'wibu (waifunya alya)', school:'Seirei Private Academy'}], school:'PS'},
+    {name:'Dastan', alias:['dastan'], crushes:[{name:'temen esde', school:'Sdmbs'}, {name:'kamila', school:'Ps'}], school:'Ps'},
+    {name:'Tara Ps', alias:['tara ps'], crushes:[{name:'kemungkinan kakel', school:'?'}, {name:'kevin', school:'?'}, {name:'mungkin banyu ?', school:'Ps'}, {name:'?', school:'?'}], school:'Ps'},
+    {name:'Nayaka', alias:['nayaka'], crushes:[{name:'Tara Ps', school:'Ps'}], school:'Ps'},
+    {name:'Ayzar', alias:['ayzar'], crushes:[{name:'Kayyisa', school:'Minss'}], school:'Ps'},
+    {name:'Alisha', alias:['alisha'], crushes:[{name:'George', school:'Ps'}], school:'Ps'},
+    {name:'Andrew', alias:['andrew'], crushes:[{name:'Mora', school:'Ps'}], school:'Ps'},
+    {name:'Alena', alias:['alena'], crushes:[{name:'Andrew', school:'Ps'}], school:'Ps'},
+    {name:'George', alias:['george'], crushes:[{name:'Alisha', school:'Ps'}], school:'Ps'},
+    {name:'Destan', alias:['destan'], crushes:[{name:'nada', school:'Ps'}], school:'Ps'},
+    {name:'Nada', alias:['nada'], crushes:[{name:'destan', school:'Ps'}], school:'Ps'},
+    {name:'Athar 7D', alias:['athar 7d'], crushes:[{name:'temen sd', school:'Sdm'}, {name:'Runa', school:'Ps'}], school:'Ps'},
+    {name:'Athar 7C', alias:['athar 7c'], crushes:[{name:'alea', school:'Ps'}], school:'Ps'},
+    {name:'Alea', alias:['alea'], crushes:[{name:'athar 7c', school:'Ps'}], school:'Ps'},
+    {name:'Sashi', alias:['sashi'], crushes:[{name:'???', school:'?'}, {name:'dastan', school:'Ps'}], school:'Ps'},
+    {name:'Arya 7D', alias:['arya 7d'], crushes:[{name:'Gita', school:'Ps'}], school:'Ps'},
+    {name:'Gita', alias:['gita'], crushes:[{name:'mungkin Arya 7D', school:'Ps'}], school:'Ps'},
+    {name:'Hammam', alias:['hammam'], crushes:[{name:'kamila', school:'Ps'}], school:'Ps'},
+    {name:'Ainun', alias:['ainun'], crushes:[{name:'?', school:'?'}], school:'Ps'},
+    {name:'Ammar', alias:['ammar'], crushes:[{name:'Esta', school:'Ps'}], school:'Ps'},
+    {name:'Esta', alias:['esta'], crushes:[{name:'Ammar', school:'Ps'}], school:'Ps'},
+    {name:'Adrian', alias:['adrian'], crushes:[{name:'Ulfa', school:'Ps'}], school:'Ps'},
+     {name:'Ulfa', alias:['ulfa'], crushes:[{name:'Adrian', school:'Ps'}], school:'Ps'},
+  ];
+
+  // ========== UTILITIES ==========
+  const escapeHtml = s => String(s).replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[c]));
+
+  const capitalize = (name) => {
+    const found = DB.find(it => it.name.toLowerCase() === name.toLowerCase());
+    return found ? found.name : name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
+  };
+
+  const getDisplayName = (name) => {
+    const found = DB.find(it => it.name.toLowerCase() === name.toLowerCase());
+    if (found) {
+      return `${found.name} (${found.school})`;
+    }
+    return name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
+  };
+
+  const formatCrushes = (crushes) => {
+    if (!crushes || crushes.length === 0) return '-';
+    return crushes.map(c => {
+      if (c.school && c.school !== '-' && c.school !== '') {
+        return `${c.name} (${c.school})`;
+      }
+      return c.name;
+    }).join(', ');
+  };
+
+  const debounce = (fn, ms) => {
+    let t;
+    return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); };
+  };
+
+  const score = (item, q) => {
+    if(!q) return 0;
+    const ql = q.toLowerCase();
+    for (const s of [item.name, ...(item.alias||[])]) {
+      const v = String(s).toLowerCase();
+      if (v === ql) return 100;
+      if (v.startsWith(ql)) return 80;
+      if (v.includes(ql)) return 50;
+    }
+    return 0;
+  };
+
+  const highlight = (text, q) => {
+    if(!q) return escapeHtml(text);
+    const idx = text.toLowerCase().indexOf(q.toLowerCase());
+    if(idx === -1) return escapeHtml(text);
+    const before = escapeHtml(text.slice(0, idx));
+    const match = escapeHtml(text.slice(idx, idx+q.length));
+    const after = escapeHtml(text.slice(idx+q.length));
+    return `${before}<mark>${match}</mark>${after}`;
+  };
+
+  // ========== MAIN LOGIC ==========
+  let activeIndex = -1;
+  const doSearchDebounced = debounce(doSearch, 100);
+
+  function onType() {
+    const q = document.getElementById('userInput').value;
+    document.getElementById('resultsWrapper').style.display = q.trim() ? 'block' : 'none';
+    doSearchDebounced(q);
+  }
+
+  function doSearch(q='') {
+    const start = performance.now();
+    const trimmed = String(q).trim();
+    
+    if (!trimmed) {
+      renderResults([]);
+      document.getElementById('searchSpeed').textContent = '—';
+      return;
+    }
+    
+    const scored = DB.map(it => ({it, s: score(it, trimmed)})).filter(x=>x.s>0);
+    scored.sort((a,b)=>b.s - a.s);
+    const results = scored.slice(0, 10).map(x=>x.it);
+    
+    renderResults(results, trimmed);
+    const ms = Math.max(0, Math.round(performance.now() - start));
+    document.getElementById('searchSpeed').textContent = `${ms}ms`;
+  }
+
+  function renderResults(results, q='') {
+    const root = document.getElementById('results');
+    root.innerHTML = '';
+    document.getElementById('resultsCount').textContent = `${results.length} result${results.length!==1 ? 's' : ''}`;
+    
+    if (results.length === 0) return;
+    
+    const frag = document.createDocumentFragment();
+    results.forEach((r, i) => {
+      const item = document.createElement('div');
+      item.className = 'result-item';
+      item.setAttribute('role','option');
+      item.dataset.index = i;
+      item.innerHTML = `
+        <div><div class="result-name">${highlight(r.name, q)} <span style="font-size:0.8em;color:var(--muted)">(${r.school})</span></div><div class="result-meta">${highlight(r.alias.join(', '), q)}</div></div>
+      `;
+      item.onclick = () => selectResult(i);
+      item.onmouseover = () => setActive(i);
+      frag.appendChild(item);
+    });
+    root.appendChild(frag);
+    activeIndex = -1;
+    updateActive();
+  }
+
+  function setActive(i) { activeIndex = i; updateActive(); }
+
+  function updateActive() {
+    document.querySelectorAll('#results .result-item').forEach((it, idx) => 
+      it.classList.toggle('active', idx === activeIndex)
+    );
+  }
+
+  function onKeyDown(e) {
+    const resultsVisible = document.getElementById('resultsWrapper').style.display === 'block';
+    const items = document.querySelectorAll('#results .result-item');
+    
+    if (!resultsVisible || items.length===0) {
+      if (e.key === 'Enter') { e.preventDefault(); sendMessage(); }
+      return;
+    }
+    
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      activeIndex = Math.min(items.length-1, activeIndex+1);
+      updateActive();
+      items[activeIndex].scrollIntoView({block:'nearest'});
+    }
+    else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      activeIndex = Math.max(0, activeIndex-1);
+      updateActive();
+      items[activeIndex].scrollIntoView({block:'nearest'});
+    }
+    else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (activeIndex >= 0) selectResult(activeIndex);
+      else sendMessage();
+    }
+    else if (e.key === 'Escape') {
+      document.getElementById('resultsWrapper').style.display = 'none';
+    }
+  }
+
+  function selectResult(index) {
+    const item = document.querySelectorAll('#results .result-item')[index];
+    if (!item) return;
+    const nameElem = item.querySelector('.result-name');
+    const fullText = nameElem.textContent.trim();
+    // Extract name only (without school info in parentheses)
+    const name = fullText.replace(/\s*\([^)]*\)\s*$/, '').trim();
+    
+    // Put name in input box
+    document.getElementById('userInput').value = name;
+    document.getElementById('resultsWrapper').style.display = 'none';
+  }
+
+  function sendMessage() {
+    const input = document.getElementById('userInput');
+    const text = input.value.trim();
+    if (!text) return;
+    
+    const displayName = getDisplayName(text);
+    addMessage('user', displayName);
+    
+    const matched = DB.find(it => 
+      it.name.toLowerCase() === text.toLowerCase() || 
+      (it.alias||[]).some(a => a.toLowerCase() === text.toLowerCase())
+    );
+    
+    setTimeout(() => addMessage('bot', matched ? `${displayName} → ${formatCrushes(matched.crushes)}` : 'No Data'), 180);
+    
+    input.value = '';
+    document.getElementById('resultsWrapper').style.display = 'none';
+  }
+
+  function addMessage(kind, text) {
+    const box = document.getElementById('chatbox');
+    const wrap = document.createElement('div');
+    wrap.className = 'msg ' + (kind==='user' ? 'user' : 'bot');
+    
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble ' + (kind==='user' ? 'user' : 'bot');
+    bubble.innerHTML = escapeHtml(text);
+    
+    const meta = document.createElement('div');
+    meta.className = 'meta';
+    meta.textContent = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    
+    wrap.appendChild(bubble);
+    wrap.appendChild(meta);
+    box.appendChild(wrap);
+    box.scrollTop = box.scrollHeight;
+  }
+
+  function clearChat() { document.getElementById('chatbox').innerHTML = ''; }
+
+  // ========== THEME & CLOCK ==========
+  let isDarkMode = false
+
+  function toggleTheme() {
+    isDarkMode = !isDarkMode
+    const root = document.documentElement
+
+    const themeBtn = document.querySelector('.theme-btn')
+    const loginThemeBtn = document.querySelector('.login-theme-btn')
+    const loginOverlay = document.getElementById('loginOverlay')
+
+    if (isDarkMode) {
+      root.style.setProperty('--bg', '#0f1419')
+      root.style.setProperty('--card', '#1a1f35')
+      root.style.setProperty('--muted', '#7c8aa8')
+      root.style.setProperty('--primary', '#00d9ff')
+      root.style.setProperty('--accent', '#7c3aed')
+      root.style.setProperty('--text', '#e0e7ff')
+      root.style.setProperty('--msg-user', '#1e2749')
+      root.style.setProperty('--msg-bot', '#161b2e')
+      root.style.setProperty('--border', '#2d3748')
+      root.style.setProperty('--hover', '#00d9ff15')
+
+      document.body.style.background =
+        'linear-gradient(135deg, #0f1419 0%, #0d1117 100%)'
+
+      if (loginOverlay)
+        loginOverlay.style.background =
+          'linear-gradient(135deg, #0f1419 0%, #0d1117 100%)'
+
+      if (themeBtn) themeBtn.textContent = '☀️'
+      if (loginThemeBtn) loginThemeBtn.textContent = '☀️'
+    } else {
+      root.style.setProperty('--bg', '#f8f9fb')
+      root.style.setProperty('--card', '#ffffff')
+      root.style.setProperty('--muted', '#6b7280')
+      root.style.setProperty('--primary', '#3b82f6')
+      root.style.setProperty('--accent', '#8b5cf6')
+      root.style.setProperty('--text', '#1f2937')
+      root.style.setProperty('--msg-user', '#dbeafe')
+      root.style.setProperty('--msg-bot', '#f3f4f6')
+      root.style.setProperty('--border', '#e5e7eb')
+      root.style.setProperty('--hover', '#f0f4ff')
+
+      document.body.style.background =
+        'linear-gradient(135deg, #f8f9fb 0%, #f0f4ff 100%)'
+
+      if (loginOverlay)
+        loginOverlay.style.background =
+          'linear-gradient(135deg, #f8f9fb 0%, #f0f4ff 100%)'
+
+      if (themeBtn) themeBtn.textContent = '🌙'
+      if (loginThemeBtn) loginThemeBtn.textContent = '🌙'
+    }
+
+    localStorage.setItem('darkMode', isDarkMode)
+  }
+
+  function updateClock() {
+    const time = new Date().toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit'
+    })
+
+    const localTimeElem = document.getElementById('localTime')
+    const loginTimeElem = document.getElementById('loginTime')
+    const totpTimeElem = document.getElementById('totpTime')
+
+    if (localTimeElem) localTimeElem.textContent = time
+    if (loginTimeElem) loginTimeElem.textContent = time
+    if (totpTimeElem) totpTimeElem.textContent = time
+  }
+
+  function onLoginKeyPress(e) { if (e.key === 'Enter') handleLogin(); }
+
+  function handleLogin() {
+    const u = document.getElementById('loginUsername').value;
+    const p = document.getElementById('loginPassword').value;
+    const err = document.getElementById('loginError');
+
+    if (u === 'Admin' && p === 'admin') {
+      err.textContent = '';
+      document.getElementById('loginOverlay').style.display = 'none';
+      document.getElementById('totpOverlay').style.display = 'flex';
+      setTimeout(() => {
+        const t = document.getElementById('totpInput'); if (t) t.focus();
+      }, 120);
+    } else {
+      err.textContent = 'Invalid username or password';
+    }
+  }
+
+  function handleLogout() {
+    document.getElementById('loginOverlay').style.display = 'flex';
+    document.getElementById('appContainer').style.display = 'none';
+    document.getElementById('totpOverlay').style.display = 'none';
+    document.getElementById('loginUsername').value = '';
+    document.getElementById('loginPassword').value = '';
+    document.getElementById('loginError').textContent = '';
+    document.getElementById('totpError').textContent = '';
+    const ti = document.getElementById('totpInput'); if (ti) ti.value = '';
+    document.getElementById('chatbox').innerHTML = '';
+    document.getElementById('userInput').value = '';
+  }
+
+  /* =========================================
+     TOTP – Web Crypto API 
+     ========================================= */
+
+  const TOTP_SECRET = 'PJAWW3RFO4ZGSZRQI4RXUSTBF56UYP2C'
+
+  function base32Decode(input) {
+    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'
+    let bits = 0
+    let value = 0
+    const bytes = []
+
+    input = input.replace(/=+$/, '').toUpperCase()
+
+    for (const char of input) {
+      const idx = alphabet.indexOf(char)
+      if (idx === -1) continue
+
+      value = (value << 5) | idx
+      bits += 5
+
+      if (bits >= 8) {
+        bytes.push((value >>> (bits - 8)) & 255)
+        bits -= 8
+      }
+    }
+
+    return new Uint8Array(bytes)
+  }
+
+  async function hmacSha1(key, msg) {
+    const cryptoKey = await crypto.subtle.importKey(
+      'raw',
+      key,
+      { name: 'HMAC', hash: 'SHA-1' },
+      false,
+      ['sign']
+    )
+
+    const sig = await crypto.subtle.sign('HMAC', cryptoKey, msg)
+    return new Uint8Array(sig)
+  }
+
+  async function generateTOTP(time = Date.now()) {
+    const key = base32Decode(TOTP_SECRET)
+    const counter = Math.floor(time / 1000 / 30)
+
+    const buffer = new ArrayBuffer(8)
+    const view = new DataView(buffer)
+
+    view.setUint32(0, Math.floor(counter / 0x100000000))
+    view.setUint32(4, counter >>> 0)
+
+    const hash = await hmacSha1(key, buffer)
+    const offset = hash[hash.length - 1] & 15
+
+    const code =
+      ((hash[offset] & 127) << 24) |
+      ((hash[offset + 1] & 255) << 16) |
+      ((hash[offset + 2] & 255) << 8) |
+      (hash[offset + 3] & 255)
+
+    return (code % 1000000).toString().padStart(6, '0')
+  }
+
+  async function verifyTOTP() {
+    const input = document.getElementById('totpInput')
+    const err = document.getElementById('totpError')
+
+    if (!input || !err) return
+
+    const code = input.value.trim()
+
+    if (!/^\d{6}$/.test(code)) {
+      err.textContent = 'Enter 6-digit code'
+      return
+    }
+
+    const now = Date.now()
+
+    for (let i = -1; i <= 1; i++) {
+      const expected = await generateTOTP(now + i * 30000)
+      if (expected === code) {
+        err.textContent = ''
+        input.value = ''
+        document.getElementById('totpOverlay').style.display = 'none'
+        document.getElementById('appContainer').style.display = 'block'
+        return
+      }
+    }
+
+    err.textContent = 'Invalid code'
+  }
+
+  window.addEventListener('load', () => {
+    updateClock()
+    setInterval(updateClock, 1000)
+
+    const saved = localStorage.getItem('darkMode')
+    if (saved === 'true') toggleTheme()
+
+    const loginOv = document.getElementById('loginOverlay');
+    const totpOv = document.getElementById('totpOverlay');
+    const appC = document.getElementById('appContainer');
+    if (loginOv) loginOv.style.display = 'flex';
+    if (totpOv) totpOv.style.display = 'none';
+    if (appC) appC.style.display = 'none';
+  });
+</script>
