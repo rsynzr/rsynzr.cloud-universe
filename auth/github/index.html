@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>GitHub Login</title>
+  <style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+body {
+  background: linear-gradient(135deg, #1e2a78, #3b3fa0);
+  color: white;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* CARD */
+.auth-card {
+  background: rgba(255,255,255,0.1);
+  padding: 45px;
+  border-radius: 15px;
+  width: 100%;
+  max-width: 420px;
+  text-align: center;
+  backdrop-filter: blur(10px);
+}
+
+.auth-card h2 {
+  margin-bottom: 15px;
+  font-size: 26px;
+}
+
+.auth-card p {
+  margin-bottom: 25px;
+  opacity: 0.9;
+  font-size: 14px;
+}
+
+/* INPUT */
+.auth-card input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+}
+
+/* BUTTON */
+.auth-btn {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 2px solid white;
+  background: transparent;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.auth-btn:hover {
+  background: white;
+  color: #1e2a78;
+}
+
+/* Loading text */
+.loading {
+  font-size: 14px;
+  opacity: 0.8;
+  margin-top: 10px;
+}
+
+/* Back link */
+.back-link {
+  display: block;
+  margin-top: 20px;
+  text-decoration: none;
+  color: white;
+  font-size: 13px;
+  opacity: 0.8;
+  transition: 0.3s;
+}
+
+.back-link:hover {
+  opacity: 1;
+}
+</style>
+</head>
+<body>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { 
+  getAuth, 
+  signInWithPopup,
+  GithubAuthProvider
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBQVXuqpkgOelSMhgg-I5QRokehHvm-c8M",
+    authDomain: "rsynzr-cloud.firebaseapp.com",
+    projectId: "rsynzr-cloud",
+    appId: "1:284978411498:web:2e1a2abb680b0a86f4a493",
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+const provider = new GithubAuthProvider();
+
+signInWithPopup(auth, provider)
+  .then(result => {
+    console.log("Login GitHub berhasil:", result.user);
+    window.location.href = "/dashboard";
+  })
+  .catch(error => {
+    console.error(error);
+    window.location.href = "/login";
+  });
+
+</script>
+
+</body>
+</html>

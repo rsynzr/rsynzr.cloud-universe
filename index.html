@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>rsynzr.cloud</title>
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg-dark: #0b1220;
+      --bg-mid: #0f1b3d;
+      --bg-light: #1a2f6b;
+      --accent: #3b82f6;
+      --accent-bright: #60a5fa;
+      --accent-glow: rgba(59, 130, 246, 0.4);
+      --text-primary: #e8f0fe;
+      --text-secondary: #94a3b8;
+      --card-bg: rgba(15, 27, 61, 0.6);
+      --card-border: rgba(59, 130, 246, 0.18);
+      --card-border-hover: rgba(96, 165, 250, 0.5);
+      --nav-bg: rgba(11, 18, 32, 0.75);
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: linear-gradient(160deg, var(--bg-dark) 0%, var(--bg-mid) 50%, var(--bg-light) 100%);
+      background-attachment: fixed;
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    /* ── NAVBAR ── */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      background: var(--nav-bg);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(59, 130, 246, 0.12);
+      padding: 0 2rem;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-brand {
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--text-primary);
+      text-decoration: none;
+    }
+
+    .nav-brand span {
+      color: var(--accent-bright);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.88rem;
+      font-weight: 500;
+      padding: 0.4rem 0.75rem;
+      border-radius: 8px;
+      transition: color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+      position: relative;
+    }
+
+    .nav-links a:hover {
+      color: var(--accent-bright);
+      background: rgba(59, 130, 246, 0.1);
+      box-shadow: 0 0 12px rgba(59, 130, 246, 0.2);
+    }
+
+    .nav-links a.cta {
+      background: rgba(59, 130, 246, 0.15);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      color: var(--accent-bright);
+    }
+
+    .nav-links a.cta:hover {
+      background: rgba(59, 130, 246, 0.28);
+      box-shadow: 0 0 18px rgba(59, 130, 246, 0.35);
+    }
+
+    /* ── HERO ── */
+    .hero {
+      padding: 10rem 2rem 6rem;
+      text-align: center;
+      max-width: 700px;
+      margin: 0 auto;
+      animation: fadeUp 0.8s ease both;
+    }
+
+    .hero-eyebrow {
+      display: inline-block;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent-bright);
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.25);
+      padding: 0.3rem 0.85rem;
+      border-radius: 20px;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero h1 {
+      font-size: clamp(2rem, 6vw, 3.2rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin-bottom: 1.25rem;
+      background: linear-gradient(135deg, #e8f0fe 30%, var(--accent-bright) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero p {
+      font-size: 1.05rem;
+      color: var(--text-secondary);
+      max-width: 520px;
+      margin: 0 auto;
+    }
+
+    /* ── SECTIONS ── */
+    .sections {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 2rem 2rem 4rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .section-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 2rem 2.25rem;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      transition: transform 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease;
+      animation: fadeUp 0.7s ease both;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .section-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(96, 165, 250, 0.4), transparent);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .section-card:nth-child(1) { animation-delay: 0.1s; }
+    .section-card:nth-child(2) { animation-delay: 0.2s; }
+    .section-card:nth-child(3) { animation-delay: 0.3s; }
+
+    .section-card:hover {
+      transform: translateY(-5px);
+      box-shadow:
+        0 16px 48px rgba(0, 0, 0, 0.35),
+        0 0 0 1px var(--card-border-hover),
+        0 0 36px rgba(59, 130, 246, 0.18);
+      border-color: var(--card-border-hover);
+    }
+
+    .section-card:hover::before {
+      opacity: 1;
+    }
+
+    .section-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent-bright);
+      margin-bottom: 0.75rem;
+    }
+
+    .section-tag-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent-bright);
+      box-shadow: 0 0 6px var(--accent-glow);
+    }
+
+    .section-card h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+      margin-bottom: 0.75rem;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+    }
+
+    .section-card h2 .domain-base {
+      color: var(--text-secondary);
+    }
+
+    .section-card p {
+      font-size: 0.93rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+
+    /* ── DONATE BUTTON ── */
+    .donate-section {
+      text-align: center;
+      padding: 1rem 2rem 5rem;
+      animation: fadeUp 0.7s 0.4s ease both;
+    }
+
+    .donate-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      padding: 0.85rem 2rem;
+      border-radius: 50px;
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(96, 165, 250, 0.15));
+      border: 1px solid rgba(96, 165, 250, 0.4);
+      color: var(--accent-bright);
+      text-decoration: none;
+      font-size: 0.95rem;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+    }
+
+    .donate-btn:hover {
+      transform: translateY(-3px);
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.35), rgba(96, 165, 250, 0.25));
+      box-shadow:
+        0 8px 30px rgba(59, 130, 246, 0.35),
+        0 0 0 1px rgba(96, 165, 250, 0.6),
+        0 0 50px rgba(59, 130, 246, 0.2);
+    }
+
+    .donate-btn:active {
+      transform: translateY(-1px);
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid rgba(59, 130, 246, 0.1);
+      padding: 1.5rem 2rem;
+      text-align: center;
+      font-size: 0.82rem;
+      color: var(--text-muted, #4a6480);
+      color: rgba(148, 163, 184, 0.5);
+    }
+
+    /* ── ANIMATION ── */
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(24px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 620px) {
+      nav {
+        padding: 0 1rem;
+      }
+
+      .nav-links {
+        gap: 0;
+      }
+
+      .nav-links a {
+        font-size: 0.78rem;
+        padding: 0.4rem 0.5rem;
+      }
+
+      .hero {
+        padding: 8rem 1.25rem 4rem;
+      }
+
+      .sections {
+        padding: 1rem 1.25rem 3rem;
+      }
+
+      .section-card {
+        padding: 1.5rem 1.5rem;
+      }
+
+      .donate-section {
+        padding: 1rem 1.25rem 4rem;
+      }
+    }
+
+    @media (max-width: 420px) {
+      .nav-links a:not(.cta) {
+        display: none;
+      }
+
+      .nav-brand {
+        font-size: 0.95rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav>
+    <a href="https://rsynzr.cloud/" class="nav-brand">rsynzr<span>.cloud</span></a>
+    <ul class="nav-links">
+      <li><a href="https://rsynzr.cloud/login/">Login</a></li>
+      <li><a href="https://rsynzr.cloud/register/" class="cta">Sign Up</a></li>
+      <li><a href="https://rsynzr.cloud/">Home</a></li>
+      <li><a href="https://project.rsynzr.cloud/">Projects</a></li>
+      <li><a href="https://donate.rsynzr.cloud/">Donate</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-eyebrow">Personal Platform</div>
+    <h1>Welcome to rsynzr.cloud</h1>
+    <p>A personal platform for projects, tools, and experiments — built and maintained as an ongoing space for learning, sharing, and creating.</p>
+  </section>
+
+  <!-- SECTIONS -->
+  <div class="sections">
+
+    <div class="section-card">
+      <div class="section-tag">
+        <span class="section-tag-dot"></span>
+        Subdomain
+      </div>
+      <h2><span class="domain-highlight">school</span><span class="domain-base">.rsynzr.cloud</span></h2>
+      <p>This subdomain is used to deploy school assignments and supporting materials. It can also host additional resources such as QR codes that link to explanations or extended content related to school tasks.</p>
+    </div>
+
+    <div class="section-card">
+      <div class="section-tag">
+        <span class="section-tag-dot"></span>
+        Subdomain
+      </div>
+      <h2><span class="domain-highlight">project</span><span class="domain-base">.rsynzr.cloud</span></h2>
+      <p>This subdomain contains a collection of digital projects that I have built. It serves as a portfolio showcasing my work, experiments, and development progress.</p>
+    </div>
+
+    <div class="section-card">
+      <div class="section-tag">
+        <span class="section-tag-dot"></span>
+        Subdomain
+      </div>
+      <h2><span class="domain-highlight">misc</span><span class="domain-base">.rsynzr.cloud</span></h2>
+      <p>This subdomain is used for miscellaneous purposes. It includes various experiments, utilities, and some additional private subdomains that are not publicly accessible.</p>
+    </div>
+
+  </div>
+
+  <!-- DONATE -->
+  <div class="donate-section">
+    <a href="https://donate.rsynzr.cloud" class="donate-btn">
+      ☕ Buy me a coffee
+    </a>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    &copy; 2026 rsynzr.cloud. All rights reserved.
+  </footer>
+
+  <style>
+    .domain-highlight {
+      color: var(--accent-bright);
+    }
+  </style>
+
+</body>
+</html>

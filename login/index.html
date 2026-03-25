@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login — rsynzr.cloud</title>
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(160deg, #0b1220 0%, #0f1b3d 55%, #1a2f6b 100%);
+      background-attachment: fixed;
+      padding: 1.5rem;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 420px;
+      background: rgba(10, 22, 48, 0.72);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      border-radius: 22px;
+      padding: 2.75rem 2.25rem 2.25rem;
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.45),
+        0 0 60px rgba(59, 130, 246, 0.07);
+      animation: fadeUp 0.6s ease both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .card-title {
+      text-align: center;
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: #fff;
+      margin-bottom: 1.85rem;
+    }
+
+    .field {
+      margin-bottom: 1rem;
+    }
+
+    input {
+      width: 100%;
+      padding: 0.8rem 1rem;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 11px;
+      color: #fff;
+      font-size: 0.92rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.22s ease, background 0.22s ease, box-shadow 0.22s ease;
+    }
+
+    input::placeholder {
+      color: rgba(255, 255, 255, 0.3);
+    }
+
+    input:focus {
+      border-color: rgba(255, 255, 255, 0.35);
+      background: rgba(255, 255, 255, 0.09);
+      box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.06);
+    }
+
+    input:-webkit-autofill,
+    input:-webkit-autofill:focus {
+      -webkit-box-shadow: 0 0 0 1000px #0d1a3a inset, 0 0 0 3px rgba(255,255,255,0.06);
+      -webkit-text-fill-color: #fff;
+      transition: background-color 9999s ease-in-out 0s;
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: 0.82rem;
+      margin-top: 0.5rem;
+      border: none;
+      border-radius: 11px;
+      background: #fff;
+      color: #0b1220;
+      font-size: 0.95rem;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.22s ease, transform 0.22s ease, box-shadow 0.22s ease;
+    }
+
+    .btn-primary:hover {
+      background: rgba(255, 255, 255, 0.82);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 22px rgba(255, 255, 255, 0.15);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    .register-link {
+      text-align: center;
+      margin-top: 1.1rem;
+      font-size: 0.84rem;
+      color: rgba(255, 255, 255, 0.45);
+    }
+
+    .register-link a {
+      color: #00ffcc;
+      text-decoration: none;
+      font-weight: 600;
+      transition: text-decoration 0.15s ease, opacity 0.15s ease;
+    }
+
+    .register-link a:hover {
+      text-decoration: underline;
+      opacity: 0.85;
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin: 1.6rem 0 1.1rem;
+    }
+
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .divider span {
+      font-size: 0.78rem;
+      color: rgba(255, 255, 255, 0.35);
+      white-space: nowrap;
+    }
+
+    .providers {
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+    }
+
+    .btn-provider {
+      width: 100%;
+      padding: 0.72rem 1rem;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 11px;
+      background: rgba(255, 255, 255, 0.2);
+      color: #fff;
+      font-size: 0.87rem;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.55rem;
+      transition: background 0.22s ease, transform 0.22s ease, border-color 0.22s ease;
+    }
+
+    .btn-provider:hover {
+      background: rgba(255, 255, 255, 0.35);
+      border-color: rgba(255, 255, 255, 0.28);
+      transform: translateY(-1px);
+    }
+
+    .btn-provider:active {
+      transform: translateY(0);
+    }
+
+    .btn-provider .icon {
+      font-size: 1rem;
+      line-height: 1;
+    }
+
+    .back-link {
+      display: block;
+      text-align: center;
+      margin-top: 1.6rem;
+      font-size: 0.83rem;
+      color: rgba(255, 255, 255, 0.35);
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+
+    .back-link:hover {
+      color: rgba(255, 255, 255, 0.9);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h1 class="card-title">Login rsynzr.cloud</h1>
+
+    <div class="field">
+      <input type="text" id="username" placeholder="Username or Email" autocomplete="username" />
+    </div>
+
+    <div class="field">
+      <input type="password" id="password" placeholder="Password" autocomplete="current-password" />
+    </div>
+
+    <button class="btn-primary" onclick="handleLogin()">Login</button>
+
+    <p class="register-link">
+      Don't have an account? <a href="/register.html">Register</a>
+    </p>
+
+    <div class="divider"><span>Or login with</span></div>
+
+    <div class="providers">
+      <button class="btn-provider" onclick="window.location.href='/auth/google'">
+        <span class="icon">🔵</span> Login with Google
+      </button>
+      <button class="btn-provider" onclick="window.location.href='/auth/github'">
+        <span class="icon">⚫</span> Login with GitHub
+      </button>
+      <button class="btn-provider" onclick="window.location.href='/auth/phone'">
+        <span class="icon">📱</span> Login with Phone
+      </button>
+      <button class="btn-provider" onclick="window.location.href='/auth/anonymous'">
+        <span class="icon">👤</span> Login as Anonymous
+      </button>
+    </div>
+
+    <a href="/" class="back-link">← Back to Home</a>
+  </div>
+
+  <script>
+    function handleLogin() {
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+      if (!username || !password) return;
+      window.location.href = '/dashboard';
+    }
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') handleLogin();
+    });
+  </script>
+
+</body>
+</html>
